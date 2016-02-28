@@ -18,22 +18,24 @@
 \addtolength{\evensidemargin} {-0.4 cm}
 \linespread{1.1}
 
-\usepackage[italian]{babel}
+\usepackage[english]{babel}
 \usepackage[latin1]{inputenc}
 \renewcommand{\captionfont}{\normalfont \sffamily \itshape \small}
 
 \pagestyle{empty}
 
 \begin{document}
-\include{frontespizio}
+\include{titlepage}
 \thispagestyle{empty} \normalfont \cleardoublepage
-\include{dedica}
+\include{dedicated}
 \thispagestyle{empty}  \cleardoublepage
 \pagenumbering{Roman}
-\include{sommario}
+\include{abstract}
 \thispagestyle{empty} \vspace*{.75truecm} \cleardoublepage
-\include{ringraziamenti}
+\include{acknowlegements}
 \thispagestyle{empty} \vspace*{.75truecm} \normalfont \cleardoublepage
+\include{tableofcontents}
+\pagenumbering{arabic}
 \pagestyle{plain}\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ #1}{}} 
 \renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}         
 \fancyhead[LE,RO]{\bfseries\thepage}    
