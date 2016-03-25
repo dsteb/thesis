@@ -1,0 +1,147 @@
+\chapter{Requirements}
+\label{requirements}
+\section{Introduction}
+
+The following requirements describe the system called \textbf{Executor}. The main goal of the \textbf{Executor} is to provide required infrastructure and resources to the controlled micro-services.
+Under micro-service we understand some 1-tier or multi-tier application. We consider only 2 types of resources: CPU cores and available RAM. 
+
+The required infrastructure and resources are provided by creating Virtual Machines and allocating containers on them. Each container is considered to store 1 tier of the application. If tier requires more resources than 1 VM has then this tier would be represented by more than 1 container on different VMs.
+
+The input of the executor is the \textbf{topology} and the \textbf{plan}. 
+The \textbf{topology} describes each application and its tiers:
+static information which can be changed only by change topology request. The \textbf{plan} says how many resources is required for each tier. 
+
+The plan can be of two different types: the \textbf{monolithic} one and the \textbf{distributed}. The \textbf{monolithic} plan means that it says just how many resources it needs for each tier and the \textbf{Executor} considering current \textbf{allocation} tries to decide how many VMs it needs to create / delete and how it should allocate containers on all VMs to satisfy all \textbf{plan} requirements. Current \textbf{allocation} it is information about currently used VMs and containers and tiers running on them.
+
+The \textbf{distributed} plan takes VMs management on its own and specifies tiers resources demand for each VM separately. It says that on this VM, this tier needs this number of CPU cores and this number of available RAM.
+
+Also continuously adjusted system requires some triggers to be run on the adjustment. The system requires two types of triggers: one that runs on each container after scaling (container create / update) and another that runs after some dependee tier (container) is scaled. We will call these triggers \textbf{hooks}. For example the first \textbf{scale hooks} are used when we need to adjust a number of threads considering how many resources container has. The second \textbf{tier hooks} are used by load balancer, which may be needs to change weights for tiers after dependee containers are changed. Also \textbf{tier hooks} can be used to provide information about dependee tiers: for example JBOSS tiers needs IP address of DB tier.
+
+\section{Specific requirements}
+This section contains all requirements for the Executor: functional, non-functional and constraints. Each requirement is described in the following sections:
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & \begin{sloppypar}Uniquely identifiers requirement \end{sloppypar}\\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}Gives the requirement a symbolic name\end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}The definition of the requirement\end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & \begin{sloppypar}Defines the order in which requirements should be implemented. Priorities are designated (highest to lowest) from 1 to 3. Requirements of priority 1 are mandatory; 2 represents features nice to have, and 3 represents optional features.
+    \end{sloppypar}\\
+  \hline
+    \textbf{Risk}  & \begin{sloppypar}
+Specifies the risk of not implementing the requirement. It shows how critical the requirement is to the system as a whole. The following risk levels are defined over the impact of not being implemented correctly.
+    \begin{itemize}
+        \item \textbf{Critical (C)} It will break the main functionality of the system. The system cannot be used if this requirement is not implemented.
+        \item \textbf{High (H)} It will impact the main functionality of the system. Some function of the system could be inaccessible, but the system can be generally used.
+        \item \textbf{Medium (M)} It will impact some system features, but not the main functionality. The system can still be used with some limitation.
+        \item \textbf{Low (L)} The system can be used without limitation, but with some workarounds.
+    \end{itemize} \end{sloppypar}\\
+  \hline
+  \end{tabular}
+\end{table}
+\clearpage
+\subsection{Functional requirements}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-0 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The user should set topology of the system\end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}The topology includes:
+      \begin{itemize}
+        \item Infrastructure description
+            \begin{itemize}
+                \item Driver used (Vagrant, AWS)
+                \item VM resources (CPU cores and RAM)
+                \item VM image
+                \item Credentials (Optional)
+            \end{itemize}
+
+        \item Max VMs value
+        \item Application list
+        \item Tiers list of each applications
+        \item Scalability of the tier
+        \item Docker image of the tier
+        \item Scale hooks
+        \item The tier dependencies list
+        \item Tier hooks
+      \end{itemize}
+    \end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 1\\
+  \hline
+    \textbf{Risk}  & C \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-1 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The user should emulate the monolithic plan execution\end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}The user should provide the monolithic plan to the system and get the result as list of actions executed: VMs created / deleted, containers created / deleted / updated, scale hooks run and tier hooks run \end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 2\\
+  \hline
+    \textbf{Risk}  & M \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-2 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The user should execute the monolithic plan\end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}The plan should describe the required resources for all the tiers of the application.\end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 1\\
+  \hline
+    \textbf{Risk}  & C \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-3 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The user should see the current allocation\end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}The system should show the created VMs with its IP addresses and tiers containers with allocated resources.\end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 1\\
+  \hline
+    \textbf{Risk}  & C \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\iffalse
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-00000 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}TITLE \end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}DESCRIPTION\end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 1\\
+  \hline
+    \textbf{Risk}  & C \\
+  \hline
+  \end{tabular}
+\end{table}
+\fi

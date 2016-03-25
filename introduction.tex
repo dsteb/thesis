@@ -1,0 +1,108 @@
+\chapter{Introduction}
+\label{introduction}
+\thispagestyle{empty}
+
+\noindent
+Nowadays software can consist of many different parts that are running together. The functional and non functional requirements are subject to continuous changing and the service infrastructure should be capable to support these changes. A concrete example of automatic infrastructure management is Amazon's AutoScaling, which manage when and how an application's resources should be dynamically increase or decrease. This paper describes implementation of alternative solution that help to solve autoscaling problems.
+
+\section{General idea}
+\begin{sloppypar}This paper describes Autonomous Systems management using different types of virtualization: virtual machines and containers. This Autonomous System adaptation is based on the MAPE framework: "M" stands for monitoring, "A" for analysing, "P" for planning and "E" for execution. In other words the system is monitored, analysed and the adaptation plan is produced that is executed by some driver depending on what virtualization technique we choose.
+\end{sloppypar}
+
+\ifx La prima parte contiene una frase che spiega l'area generale dove si svolge il lavoro; una che spiega la sottoarea pi\`u specifica dove si svolge il lavoro e la terza, che dovrebbe cominciare con le seguenti parole ``lo scopo della tesi \`e \dots'', illustra l'obbiettivo del lavoro. Poi vi devono essere una o due frasi che contengano una breve spiegazione di cosa e come \`e stato fatto, delle attivit\`a sperimentali, dei risultati ottenuti con una valutazione e degli sviluppi futuri. La prima parte deve essere circa una facciata e mezza o due
+\fi
+
+\section{Autonomic system}
+Autonomic system is self-adapting self-managing system with distributed resources, that can adapt to unpredictable changes while hiding intrinsic complexity to operators and users. 
+IBM was on of the first companies who suggested this kind of systems and it has set forth eight conditions that define an autonomic system:
+The system must
+\begin{enumerate}
+    \item know itself in terms of what resources it has access to, what its capabilities and limitations are and how and why it is connected to other systems.
+    \item be able to automatically configure and reconfigure itself depending on the changing computing environment.
+    \item be able to optimize its performance to ensure the most efficient computing process.
+    \item be able to work around encountered problems by either repairing itself or routing functions away from the trouble.
+    \item detect, identify and protect itself against various types of attacks to maintain overall system security and integrity.
+    \item The system must be able to adapt to its environment as it changes, interacting with neighboring systems and establishing communication protocols.
+    \item rely on open standards and cannot exist in a proprietary environment.
+    \item anticipate the demand on its resources while keeping transparent to users.
+\end{enumerate}
+
+Even though the purpose and thus the behaviour of autonomic systems vary from system to system, every autonomic system should be able to exhibit a minimum set of properties to achieve its purpose:
+\begin{enumerate}
+    \item Automatic: This essentially means being able to self-control its internal functions and operations. As such, an autonomic system must be self-contained and able to start-up and operate without any manual intervention or external help. Again, the knowledge required to bootstrap the system (Know-how) must be inherent to the system.
+    \item Adaptive: An autonomic system must be able to change its operation (i.e., its configuration, state and functions). This will allow the system to cope with temporal and spatial changes in its operational context either long term (environment customisation/optimisation) or short term (exceptional conditions such as malicious attacks, faults, etc.).
+    \item Aware: An autonomic system must be able to monitor (sense) its operational context as well as its internal state in order to be able to assess if its current operation serves its purpose. Awareness will control adaptation of its operational behaviour in response to context or state changes.
+\end{enumerate}
+
+\section{MAPE The IBM Autonomic Framework}
+The IBM Autonomic COmputing Initiative codified an external, feedback control approach in its Autonomic Monitor-Analyze-Plan-Execute (MAPE) Model. Figure 1 illustrates the MAPE loop, which distinguishes between the autonomic manager (embodied in the large rounded rectangle) and the managed element, which is either an entire system or a component within a larger system. The MAP loop highlights four essential apsects of self-adaptation:
+\begin{enumerate}
+    \item \textbf{Monitor}: The monitoring phase is concerned with extracting information - properties or states - out of the managed element. Mechanisms range from source-code instrumentation to non-intrusive communication interception.
+    \item \textbf{Analyze}: is concerned with determining if something has one away in the system, usually because a system property exhibits a value outside of expected bounds, or has a degrading trend.
+    \item \textbf{Plan}: is concerned with determining a course of action to adapt the managed element once a problem is detected.
+    \item \textbf{Execute}: is concerned with carrying out a chosen course of action and effecting the changes in the system.
+\end{enumerate}
+ 
+\begin{figure}[h]
+  \centering
+    \includegraphics[natwidth=264,natheight=198]{./pictures/mape}
+    \caption{Fig. 1 The IBM Autonomic MAPE Reference model}
+\end{figure}
+  
+
+\section{Cloud and coarse-grained virtualization}
+Modern web applications more often are run in the cloud. By the cloud it is very often means that application is deployed not on real physical (bare-metal) machine, but on the virtual machine where virtual infrastructure can be configured on the cluster of machines. This approach has advantages to classic bare-metal one. First of all it is scalability: as machine is virtual we can do vertical scaling (allocate CPU cores or RAM) as we want, moreover if the cloud infrastructure works on the cluster, we can provide resources that one real machine just do not have. The second advantage is again scaling: we can easily create new virtual machines this is called horizontal scaling. And the last advantage is on-demand computing or pay-as-you-go, when you do not need to pay upfront, but only for the resources you use.
+
+\begin{sloppypar}
+Current implementation uses Amazon Elastic Cloud Computing as cloud provider. Also it is supported Vagrant. Vagrant is software that is higher-level wrapper around virtualization software such as VirtualBox, VMWare, KVM, Linux containers and Amazon EC2. Vagrant and Amazon EC2 drivers do not use vertical scaling features, but only the horizontal one: creating/deling new virtual machines. This scaling is considered as coarse-grained, because Amazone EC2 VM and VirtualBox VM takes quite long time to create and use heavy virtualization technologies: like full-virtualization, paravirtualization or hardware-assisted virtualization.
+\end{sloppypar}
+
+This is in the opposite to light-weight operation system-level virtualization based on Linux containers. Current implementation uses docker engine for managing containers. With containers vertical scaling (allocation CPU cores and RAM) and horizontal scaling (creating/ deleting new containers) is much faster than the same operation with full virtualization.
+
+\section{Containers}
+Container virtualization it is operating-system-level virtualization method where the kernel of an operating systems allows for multiple isolated user-space instances, instead of just one.
+For current implementation we use docker implementation of container virtualization. It uses modern Linux features like LXC containers and cgroups for managing resources. 
+Containers have some advantages comparing to classic full-virtualization: they have very low or zero overhead, because they are running without emulation and just send system signals to operation system kernel. Moreover containers are much more faster to create/delete as they do not need to start / stop operation system that can take significant amount of time. On the other hand containers are not considered as classic virtualization killers, that will take its place. Current approach is to use classic virtualization for clouds, and run container above classic virtual machines, so the containers virtualization is used above the classic one.
+
+\begin{figure}[h]
+  \centering
+    \includegraphics[width=335px,height=217px,natwidth=770,natheight=434]{./pictures/docker-vm-container}
+    \caption{Fig. 2 Comparing VM to container}
+\end{figure}
+
+\section{Contribution}
+The main contribution was implementing the "E" executor part of MAPE framework applied to autonomous system. Different implementation cases were researched with different virtualization techniques and implementations.
+First of all executor accepts as the input the plan from the  "P" planner. It was considered two different implementations of executor: "monolithic" and "distributed". The difference between them is that the monolithic executor manages virtual machines on its own, it decides when it is required to create/delete virtual machine, the input plan goes to the main node, which orchestrates agent nodes (virtual machines) with docker containers. The distributed executor manages only containers on the virtual machines and the plan goes directly to the agent, so the executor does not need to estimate the number of virtual machines or try to solve allocation problem.
+
+Also the executor considers different types of virtualization: coarse-grained one (full-virtualization, hardware-assisted or paravirtualization) and the operation system-level virtualization (containers). For coarse-grained virtualization it were implemented drivers for vagrant and amazon elastic compute cloud, that supports a lot of different virtualization types. For containers the driver for docker was implemented. 
+
+Also for continuously changing environment it should be implemented some configuration adjustment. For example after scaling JBOSS application from using 1 CPU and 2gb RAM to 8 CPU and 16gb RAM, we want to run instead of 4 JBOSS threads, 32 threads. This requirement was implemented as "scale-hooks" which are run on each docker container creation/update. Also sometimes configuration adjustment should be more complex, taking the same example with JBOSS resources update, load balancing node needs to change weights or to add new nodes to its configuration. So load balancing node should wait for finishing of create/update operations on each JBOSS node and after that trigger its adjustment. This type of adjustment we call "tier-hooks" and for them should be specified dependency, for example load balance node depends on JBOSS tier. After each change of JBOSS tier, the tier-hooks are run for the nodes that depends on the changed tier.
+
+
+\ifx {Breve descrizione del lavoro}
+La seconda parte deve essere una esplosione della prima e deve quindi mostrare in maniera pi\`u esplicita l'area dove si svolge il lavoro, le fonti bibliografiche pi\`u importanti su cui si fonda il lavoro in maniera sintetica (una pagina) evidenziando i lavori in letteratura che presentano attinenza con il lavoro affrontato in modo da mostrare da dove e perch\'e \`e sorta la tematica di studio. Poi si mostrano esplicitamente le realizzazioni, le direttive future di ricerca, quali sono i problemi aperti e quali quelli affrontati e si ripete lo scopo della tesi. Questa parte deve essere piena (ma non grondante come la sezione due) di citazioni bibliografiche e deve essere lunga circa 4 facciate.
+\fi
+
+\section{Thesis structure}
+The second part describes functional and non functional requirements for the executor module of the MAPE framework.
+Also it describes solution design, considering initial problems, approaches, decisions made and architecture chosen.
+
+The third part describes the technologies, algorithms and implementation details.
+
+\ifx 
+{Struttura della tesi}
+La terza parte contiene la descrizione della struttura della tesi ed \`e organizzata nel modo seguente.
+``La tesi \`e strutturata nel modo seguente.
+
+Nella sezione due si mostra \dots
+
+Nella sez. tre si illustra \dots
+
+Nella sez. quattro si descrive \dots
+
+Nelle conclusioni si riassumono gli scopi, le valutazioni di questi e le prospettive future \dots
+
+Nell'appendice A si riporta \dots (Dopo ogni sezione o appendice ci vuole un punto).''
+
+I titoli delle sezioni da 2 a M-1 sono indicativi, ma bisogna cercare di mantenere un significato equipollente nel caso si vogliano cambiare. Queste sezioni possono contenere eventuali sottosezioni.
+\fi

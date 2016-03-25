@@ -1,20 +1,27 @@
 \select@language {english}
 \contentsline {chapter}{Abstract}{I}
 \contentsline {chapter}{Acknowlegements}{III}
-\contentsline {chapter}{\numberline {1}Introduzione}{1}
-\contentsline {section}{\numberline {1.1}Inquadramento generale}{1}
-\contentsline {section}{\numberline {1.2}Breve descrizione del lavoro}{2}
-\contentsline {section}{\numberline {1.3}Struttura della tesi}{2}
-\contentsline {chapter}{\numberline {2}Stato dell'arte}{3}
-\contentsline {chapter}{\numberline {3}Impostazione del problema di ricerca}{5}
-\contentsline {chapter}{\numberline {4}Progetto logico della soluzione del problema}{7}
-\contentsline {chapter}{\numberline {5}Architettura del sistema}{9}
-\contentsline {chapter}{\numberline {6}Realizzazioni sperimentali e valutazione}{11}
-\contentsline {chapter}{\numberline {7}Direzioni future di ricerca e conclusioni}{13}
-\contentsline {chapter}{Bibliografia}{15}
-\contentsline {chapter}{\numberline {A}Documentazione del progetto logico}{17}
-\contentsline {chapter}{\numberline {B}Documentazione della programmazione}{19}
-\contentsline {chapter}{\numberline {C}Listato}{21}
-\contentsline {chapter}{\numberline {D}Il manuale utente}{23}
-\contentsline {chapter}{\numberline {E}Esempio di impiego}{25}
-\contentsline {chapter}{\numberline {F}Datasheet}{27}
+\contentsline {chapter}{\numberline {1}Introduction}{1}
+\contentsline {section}{\numberline {1.1}General idea}{1}
+\contentsline {section}{\numberline {1.2}Autonomic system}{1}
+\contentsline {section}{\numberline {1.3}MAPE The IBM Autonomic Framework}{3}
+\contentsline {section}{\numberline {1.4}Cloud and coarse-grained virtualization}{4}
+\contentsline {section}{\numberline {1.5}Containers}{4}
+\contentsline {section}{\numberline {1.6}Contribution}{5}
+\contentsline {section}{\numberline {1.7}Thesis structure}{6}
+\contentsline {chapter}{\numberline {2}Requirements}{7}
+\contentsline {section}{\numberline {2.1}Introduction}{7}
+\contentsline {section}{\numberline {2.2}Specific requirements}{8}
+\contentsline {subsection}{\numberline {2.2.1}Functional requirements}{10}
+\contentsline {chapter}{\numberline {3}Impostazione del problema di ricerca}{13}
+\contentsline {chapter}{\numberline {4}Progetto logico della soluzione del problema}{15}
+\contentsline {chapter}{\numberline {5}Architettura del sistema}{17}
+\contentsline {chapter}{\numberline {6}Realizzazioni sperimentali e valutazione}{19}
+\contentsline {chapter}{\numberline {7}Direzioni future di ricerca e conclusioni}{21}
+\contentsline {chapter}{Bibliografia}{23}
+\contentsline {chapter}{\numberline {A}Documentazione del progetto logico}{25}
+\contentsline {chapter}{\numberline {B}Documentazione della programmazione}{27}
+\contentsline {chapter}{\numberline {C}Listato}{29}
+\contentsline {chapter}{\numberline {D}Il manuale utente}{31}
+\contentsline {chapter}{\numberline {E}Esempio di impiego}{33}
+\contentsline {chapter}{\numberline {F}Datasheet}{35}

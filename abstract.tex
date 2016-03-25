@@ -2,4 +2,24 @@
 \chapter*{Abstract}
 
 \addcontentsline{toc}{chapter}{Abstract}
-This paper presents the research on Autonomic Systems with different types of virtualization. It were investigated coarse-grained virtualization techniques like virtual machines or cloud instances, and light-weight fine-grained techniques like operating system-level virtualization (containers). The thesis scope is implementation demo case of Autonomic System using different virtualization elements and considering the advantages and disadvantages of using containers for building Autonomic Systems.
+The world is moving to economy of the nature resources and environment-friendly solutions that can be called sustainable solutions. Approach of sustainability can be also applied to large computer infrastructures to adapt allocated resources depending on the load, on the time of the day or on other input.
+
+Modern Web applications exploit Cloud infrastructures to
+scale their resources and cope with sudden changes in the
+workload. While the state of practice is to focus on dynamically adding and removing virtual machines, we also implement and look on more fine-grained solution: operation system-level containerization.
+
+In this paper we present an autoscaling technique that allows containerized applications to scale their resources both at the VM level and at the container level. Furthermore, applications can combine this infrastructural adaptation with platform-level adaptation. The autoscaling is made possible by our planner, which consists of a discrete-time feedback
+controller.
+
+The work investigates coarse-grained virtualization techniques like virtual machine comparing to light-weight fine-grained techniques like operating system-level virtualization (containers virtualization). The scope is of the thesis is implementation of both techniques and comparing the advantages and disadvantages of each of them.
+
+\ifx
+The work has been validated using two application bench-
+marks deployed to Amazon EC2. Our experiments show
+that our planner outperforms Amazon’s AutoScaling by 78%
+on average without containers; and that the introduction of
+containers allows us to improve by yet another 46% on av-
+erage.
+
+This paper presents the research on Autonomic Systems with different types of virtualization. It were investigated coarse-grained virtualization techniques like virtual machines or cloud instances, and light-weight fine-grained techniques like operating system-level virtualization (containers). The thesis scope is implementation case of Autonomic System using different virtualization elements and considering the advantages and disadvantages of using containers for building Autonomic Systems.
+\fi
