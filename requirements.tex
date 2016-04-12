@@ -3,19 +3,19 @@
 \section{Introduction}
 
 The following requirements describe the system called \textbf{Executor}. The main goal of the \textbf{Executor} is to provide required infrastructure and resources to the controlled micro-services.
-Under micro-service we understand some 1-tier or multi-tier application. We consider only 2 types of resources: CPU cores and available RAM. 
+With the term micro-service we understand some 1-tier or multi-tier application. We consider only 2 types of resources: CPU cores and available RAM. 
 
 The required infrastructure and resources are provided by creating Virtual Machines and allocating containers on them. Each container is considered to store 1 tier of the application. If tier requires more resources than 1 VM has then this tier would be represented by more than 1 container on different VMs.
 
 The input of the executor is the \textbf{topology} and the \textbf{plan}. 
 The \textbf{topology} describes each application and its tiers:
-static information which can be changed only by change topology request. The \textbf{plan} says how many resources is required for each tier. 
+static information which can be changed only by sending "change topology" request. The \textbf{plan} says how many resources are required for each tier. 
 
-The plan can be of two different types: the \textbf{monolithic} one and the \textbf{distributed}. The \textbf{monolithic} plan means that it says just how many resources it needs for each tier and the \textbf{Executor} considering current \textbf{allocation} tries to decide how many VMs it needs to create / delete and how it should allocate containers on all VMs to satisfy all \textbf{plan} requirements. Current \textbf{allocation} it is information about currently used VMs and containers and tiers running on them.
+The plan can be of two different types: the \textbf{monolithic} and the \textbf{hierarchical} one. The \textbf{monolithic} plan says just how many resources it needs for each tier and the \textbf{Executor} considering current \textbf{allocation} tries to decide how many VMs it needs to create / delete and how it should allocate containers on all VMs to satisfy all \textbf{plan} requirements. Current \textbf{allocation} is information about currently used VMs, containers and tiers running on them.
 
-The \textbf{distributed} plan takes VMs management on its own and specifies tiers resources demand for each VM separately. It says that on this VM, this tier needs this number of CPU cores and this number of available RAM.
+The \textbf{hierarchical} plan takes VMs management on its own and specifies tiers resources demand for each VM separately. It says that on this VM, this tier needs this number of CPU cores and this number of available RAM.
 
-Also continuously adjusted system requires some triggers to be run on the adjustment. The system requires two types of triggers: one that runs on each container after scaling (container create / update) and another that runs after some dependee tier (container) is scaled. We will call these triggers \textbf{hooks}. For example the first \textbf{scale hooks} are used when we need to adjust a number of threads considering how many resources container has. The second \textbf{tier hooks} are used by load balancer, which may be needs to change weights for tiers after dependee containers are changed. Also \textbf{tier hooks} can be used to provide information about dependee tiers: for example JBOSS tiers needs IP address of DB tier.
+Also a continuously adjusted system requires some triggers to be run on the adjustment. The system requires two types of triggers: one that runs on each container after scaling (container create / update) and another that runs after some dependee tier (container) is scaled. We will call these triggers \textbf{hooks}. For example the first \textbf{scale hooks} are used when we need to adjust a number of threads considering how many resources container has. The second \textbf{tier hooks} are used by load balancer, which may need to change weights for tiers after dependee containers are changed. Also \textbf{tier hooks} can be used to provide information about dependee tiers: for example JBOSS tiers need the IP address of the DB tier.
 
 \section{Specific requirements}
 This section contains all requirements for the Executor: functional, non-functional and constraints. Each requirement is described in the following sections:
@@ -28,7 +28,7 @@ This section contains all requirements for the Executor: functional, non-functio
   \hline
     \textbf{Description}  & \begin{sloppypar}The definition of the requirement\end{sloppypar}\\
   \hline
-    \textbf{Priority}  & \begin{sloppypar}Defines the order in which requirements should be implemented. Priorities are designated (highest to lowest) from 1 to 3. Requirements of priority 1 are mandatory; 2 represents features nice to have, and 3 represents optional features.
+    \textbf{Priority}  & \begin{sloppypar}Defines the order in which requirements should be implemented. Priorities are designated (highest to lowest) from 1 to 3. Requirements of priority 1 are mandatory; 2 represents "nice to have" features , and 3 represents optional features.
     \end{sloppypar}\\
   \hline
     \textbf{Risk}  & \begin{sloppypar}
@@ -52,13 +52,12 @@ Specifies the risk of not implementing the requirement. It shows how critical th
   \hline
     \textbf{Title}  & \begin{sloppypar}The user should set topology of the system\end{sloppypar}\\
   \hline
-    \textbf{Description}  & \begin{sloppypar}The topology includes:
+    \textbf{Description}  & \begin{sloppypar}The topology should include:
       \begin{itemize}
         \item Infrastructure description
             \begin{itemize}
                 \item Driver used (Vagrant, AWS)
-                \item VM resources (CPU cores and RAM)
-                \item VM image
+                \item AWS autoscaling group name
                 \item Credentials (Optional)
             \end{itemize}
 
@@ -70,6 +69,7 @@ Specifies the risk of not implementing the requirement. It shows how critical th
         \item Scale hooks
         \item The tier dependencies list
         \item Tier hooks
+        \item 
       \end{itemize}
     \end{sloppypar}\\
   \hline
@@ -85,7 +85,7 @@ Specifies the risk of not implementing the requirement. It shows how critical th
   \hline
     \textbf{Requirement ID}  & FR-1 \\
   \hline
-    \textbf{Title}  & \begin{sloppypar}The user should emulate the monolithic plan execution\end{sloppypar}\\
+    \textbf{Title}  & \begin{sloppypar}The user should emulate a monolithic plan execution\end{sloppypar}\\
   \hline
     \textbf{Description}  & \begin{sloppypar}The user should provide the monolithic plan to the system and get the result as list of actions executed: VMs created / deleted, containers created / deleted / updated, scale hooks run and tier hooks run \end{sloppypar}\\
   \hline
@@ -101,7 +101,7 @@ Specifies the risk of not implementing the requirement. It shows how critical th
   \hline
     \textbf{Requirement ID}  & FR-2 \\
   \hline
-    \textbf{Title}  & \begin{sloppypar}The user should execute the monolithic plan\end{sloppypar}\\
+    \textbf{Title}  & \begin{sloppypar}The user should execute a monolithic plan\end{sloppypar}\\
   \hline
     \textbf{Description}  & \begin{sloppypar}The plan should describe the required resources for all the tiers of the application.\end{sloppypar}\\
   \hline
@@ -119,11 +119,147 @@ Specifies the risk of not implementing the requirement. It shows how critical th
   \hline
     \textbf{Title}  & \begin{sloppypar}The user should see the current allocation\end{sloppypar}\\
   \hline
-    \textbf{Description}  & \begin{sloppypar}The system should show the created VMs with its IP addresses and tiers containers with allocated resources.\end{sloppypar}\\
+    \textbf{Description}  & \begin{sloppypar}The allocation should include
+    \begin{itemize}
+        \item VMs IP addresses
+        \item VMs containers
+        \item container resources (CPU cores and RAM)
+    \end{itemize}
+    \end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 2\\
+  \hline
+    \textbf{Risk}  & M \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-4 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The user should see the docker information about running containers  \end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}The user should see output of "docker inspect" command for each container on each VM. The interested information is "cpuset" and RAM used by the docker container.\end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 2\\
+  \hline
+    \textbf{Risk}  & M \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-5 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The user should emulate a hierarchical plan execution on a VM \end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}Each VM should accept a hierarchical plan and emulate its execution, showing updated / created / deleted containers and scale-hooks that should be executed.\end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 2\\
+  \hline
+    \textbf{Risk}  & H \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-6 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The user should execute a hierarchical plan \end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}The user should execute a hierarchical plan on the VM\end{sloppypar}\\
   \hline
     \textbf{Priority}  & 1\\
   \hline
     \textbf{Risk}  & C \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-7 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The system should distinguish the scalable and not scalable tiers in the topology \end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}The maximum number of containers for the not scalable tier is 1. For the both scalable and not scalable tiers the minimum number of containers is 0.\end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 3\\
+  \hline
+    \textbf{Risk}  & L \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-8 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The system should run scale-hooks after containers create / update actions \end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}Each VM after creating / updating containers check the topology if scale-hooks specified for this tier and run them. Scale-hook is a bash script that get as an input 4 integer arguments: initial CPU cores usage, initial RAM memory units usage, new CPU cores usage, new RAM memory units usage.\end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 2\\
+  \hline
+    \textbf{Risk}  & M \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-9 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The system should run tier-hooks after creating / deleting / updating of dependee tier containers \end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar}The topology should specify an optional dependency between tiers. The type of dependencies supported is: 1-to-n (a dependency from a not scalable tier to a scalable), 1-to-1 (a dependency from a not scalable tier to a not scalable), n-to-1 (a dependency from a scalable tier to a not scalable). The dependency n-to-n (from a scalable tier to a sclalable tier) is not required. The tier-hook is a bash script that gets as an input 3 string arguments: a dependent tier name, a dependee tier name and a new allocation JSON stringified. \end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 2\\
+  \hline
+    \textbf{Risk}  & M \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-11 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The hierarchical plan should processed through the master node \end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar} Besides the fact that the hierarchical plan can be run directly on the agent node, we should have a 1 entry point (the master node) to manage dependencies and tier-hooks.
+    \end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 2\\
+  \hline
+    \textbf{Risk}  & M \\
+  \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[ht]
+  \begin{tabular}{|p{3.5cm}|p{8cm}|}
+  \hline
+    \textbf{Requirement ID}  & FR-11 \\
+  \hline
+    \textbf{Title}  & \begin{sloppypar}The hierarchical plan should be executed only when messages from each planner have arrived \end{sloppypar}\\
+  \hline
+    \textbf{Description}  & \begin{sloppypar} The hierarchical planner sends the new plan from each container, but we can not proceed immediately these plans due to dependencies. So plans should be processed considering dependencies only after the executor received plans from each container (tier).
+    \end{sloppypar}\\
+  \hline
+    \textbf{Priority}  & 2\\
+  \hline
+    \textbf{Risk}  & M \\
   \hline
   \end{tabular}
 \end{table}
@@ -145,3 +281,24 @@ Specifies the risk of not implementing the requirement. It shows how critical th
   \end{tabular}
 \end{table}
 \fi
+
+\clearpage
+\subsection{Non functional requirements}
+\begin{enumerate}
+    \item (NFR-0) A monolithic executor should not create / use VMs, if it is possible to allocate resources on less number of VMs.
+    \item (NFR-1) An allocation should use resources (CPU cores and RAM) equal to a demand (required in a plan).
+    \item (NFR-2) A move from a previous allocation to a new one should have minimized weight of actions. Possible actions: VM create, VM delete, VM use, container create, container delete, container update, container use. The weights can be tuned, but the order of weights should be: VM create \textgreater{} VM use \textgreater{} VM delete  and \\
+    container create \textgreater{} container update \textgreater{} container use \textgreater{} container delete
+    \item (NFR-3) A monolithic plan that requires about 100 tiers and 50 VMs should be emulated in less than 10s
+    \item (NFR-4) All the requests should be closed by the authorisation.
+    \item (NFR-5) Actions of the plan should run in the order of dependencies. Nodes that are dependees should be run first. A dependency graph should be taken into the account.
+    \item (NFR-6) Containers should be created before the delete action, otherwise the application will not have enough resources in the moment between containers were deleted and before they are created.
+\end{enumerate}
+
+\subsection{Use case diagram}
+The use case diagram shows main user actions. It is considered that for the monolithic plan the user runs these actions on the main node, but for the distributed executor on the agent (the virtual machine)
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=300px,height=322px,natwidth=404,natheight=433]{./pictures/use-case}
+    \caption{Use-case diagram}
+\end{figure}
