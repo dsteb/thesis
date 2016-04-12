@@ -454,6 +454,10 @@ The current approach with solving a plan using ILP formulation we call the "mono
 
 To go around large control loop timeouts we decided that MAPE components can be hierarchically spread among all the VMs and containers. So instead of having the one global planner, we want to have planner for each container. This we call the hierarchical approach.
 
+In the hierarchical approach for each container there is the planner which produce the plan for its own container. To handle the VM constraints in CPU cores and memory, the VM has another planner that consolidates all containers plan and resolves this constraints. In the future work we are thinking to have the CPU requirement in the plan as the float number, this simplifies the constraint resolving considering each plan.
+
+After plans are built for each VM, it hierarchically goes to the root planner and the root planer provides the plan to the master node executor. The master node executor accepts the plan, but it do not run it until the plans from each VM have arrived. This is because of the tier-hooks. To support tier-hooks we need to execute actions in the particular order (calculated by the dependency-graph), so we can not run some actions, until we know all the actions we need to run.
+
 \section{Drivers}
 There were implemented several drivers for managing virtual / cloud infrastructure: Vagrant, AWS, Docker.
 
@@ -567,6 +571,7 @@ Any arguable ILP solution can be inspected in details and added to the tests.
 
 Also algorithms like "building the dependency graph", "translation from allocation to actions" are tested too.
 
+\clearpage
 \section{UML}
 \begin{figure}[ht]
   \centering
@@ -585,3 +590,51 @@ Also algorithms like "building the dependency graph", "translation from allocati
     \includegraphics[height=450px,natwidth=433,natheight=593]{./pictures/sequence}
     \caption{Sequence diagram}
 \end{figure}
+
+\clearpage
+\section{Examples}
+\subsection{The monolithic executor}
+For example we have initially empty system without running VMs and containers. The topology of our applications is the same as in the listing 4.4. The executor is running locally on the port 8000: http://localhost:8000/. The autoscaling group "monolithic\_ex\_8cpu " is configured and it uses VMs with 8 CPU cores and 32gb of RAM (64 RAM units).
+
+As the HTTP client we can consider the unix tool "curl". 
+
+First we set the topology
+
+\texttt{curl -X PUT -d @topology.json \$endpoint}\\
+where "topology.json" file contains the same json as in the listing 4.4 and \$endpoint is
+\texttt{http://localhost:8000/api/topology}
+
+We can check the new topology opening in any browser \\ \texttt{http://localhost:8000/api/topology}.
+
+For example now we want to start only the rubis application, giving 4 CPU cores and 4gb of RAM to "app\_server" and 1 CPU core and 4gb of RAM to the "db" tier.
+
+For this example the payload.json" should be:
+
+\begin{lstlisting}[caption=payload.json,basicstyle=\tiny]
+{
+  "rubis": {
+    "app_server": {
+      "cpu_cores": 4,
+      "mem_units": 8
+    },
+    "db": {
+      "cpu_cores": 1,
+      "mem_units": 8
+    }
+  }
+}
+\end{lstlisting}
+
+First, we can check which actions would be run for this plan by calling endpoint for translation. This call will not run these actions.
+
+\texttt{curl -X PUT -d @payload.json \$endpoint}\\
+the \$endpoint is \texttt{http://localhost:8000/api/translate}
+
+After that we can execute the plan by calling the execute endpoint:
+
+\texttt{curl -X PUT -d @payload.json \$endpoint}\\
+where \$endpoint is \texttt{http://localhost:8000/api/execute}
+
+We can check new allocation by calling these endpoints from the browser: \texttt{http://localhost:8000/api/allocation} and \\ \texttt{http://localhost:8000/api/inspect}.
+
+After the planner decides to change the allocation of the containers it should just send to /execute/ endpoint the new payload with the new resources demand.
